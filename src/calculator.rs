@@ -18,8 +18,8 @@ impl Calculator {
 
     pub fn interpret(&mut self, parsed_command: ParsedCommand) -> String {
         match parsed_command.command.as_str() {
-            "define" => self.define(parsed_command.matrix_name, parsed_command.args),
-            "show" => todo!(),
+            "define" | "def"  => self.define(parsed_command.matrix_name, parsed_command.args),
+            "echo"   | "show" => self.show(parsed_command.matrix_name),
             _ => todo!()
         }
     }
@@ -41,5 +41,13 @@ impl Calculator {
     
         let message = format!("Defined Matrix {} as {}x{} matrix", name, m, n);
         message
+    }
+
+    fn show(&self, matrix_name: String) -> String {
+        if let Some(matrix) = self.memory.get(&matrix_name) {
+            matrix.to_string()
+        } else {
+            format!("Matrix '{}' not found.", matrix_name)
+        }
     }
 }
