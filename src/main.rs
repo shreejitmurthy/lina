@@ -4,27 +4,57 @@ mod parser;
 mod calculator;
 
 use parser::*;
+use calculator::*;
 
-// fn main() {
-//     let m1 = Matrix::new(2, 3);
-//     // let m2 = Matrix::new(3, 2);
-
-//     // let result = multiply_matrices(m1, m2);
-//     let result = transpose_matrix(m1);
-
-//     result.print();
-// }
+use std::io;
+use std::io::Write;
 
 fn main() {
-    let input = "define A 2x2";
-    match parse_input(input) {
+    let mut calc = Calculator::new();
+    loop {
+        print!("> ");
+        io::stdout().flush().unwrap();
+        let mut input = String::new();
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read line");
+    
+        if input.trim() == "exit" || input.trim() == "ex" {
+            println!("Exiting...");
+            break;
+        }
+    
+        match parse_input(input.as_str()) {
+            Ok(parsed_command) => {
+                let result = calc.interpret(parsed_command);
+                println!("=> {}", result)
+            }
+            Err(e) => {
+                println!("Error parsing input: {:?}", e);
+            }
+        }
+    }
+    print!("> ");
+    io::stdout().flush().unwrap();
+    let mut input = String::new();
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+
+    if input.trim() == "exit" || input.trim() == "ex" {
+        println!("Exiting...");
+        // break;
+    }
+
+    match parse_input(input.as_str()) {
         Ok(parsed_command) => {
-            println!("{:?}", parsed_command);
+            let result = calc.interpret(parsed_command);
+            println!("=> {}", result)
         }
         Err(e) => {
             println!("Error parsing input: {:?}", e);
         }
     }
-    
+
 
 }
