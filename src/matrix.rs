@@ -1,3 +1,4 @@
+use std::fmt::Write;
 
 #[derive(Clone, PartialEq)]
 pub struct Matrix {
@@ -10,6 +11,22 @@ impl Matrix {
     pub fn new(rows: usize, cols: usize) -> Self {
         let data = vec![vec![0.0; cols]; rows];
         Matrix { rows, cols, data }
+    }
+
+    pub fn to_string(&self) -> String {
+        let mut result = String::new(); // Create an empty `String` to collect the output
+
+        for row in &self.data {
+            write!(result, "|").unwrap(); // Start each row with a `|`
+            
+            for elem in row {
+                write!(result, " {:<2}", elem).unwrap(); // Add each element with padding
+            }
+    
+            writeln!(result, "|").unwrap(); // End each row with a `|`
+        }
+    
+        result // Return the final collected string
     }
 
     pub fn print(&self) {
