@@ -2,9 +2,9 @@ use crate::lexer::*;
 
 #[derive(Debug)]
 pub struct ParsedCommand {
-    command: String,
-    matrix_name: String,
-    args: String,
+    pub command: String,
+    pub matrix_name: String,
+    pub args: String,
 }
 
 pub fn parser(tokens: Vec<Token>) -> Result<ParsedCommand, ParseError> {
