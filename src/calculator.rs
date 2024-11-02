@@ -1,6 +1,8 @@
 // For calculations and parsed command interpretations.
 
+use core::f64;
 use std::collections::HashMap;
+use std::ffi::c_void;
 use crate::parser::*;
 use crate::matrix::*;
 
@@ -8,12 +10,14 @@ use regex::Regex;
 
 pub struct Calculator {
     // { MatrixName, Matrix }
-    pub memory: HashMap<String, Matrix>
+    pub memory: HashMap<String, Matrix>,
+    pub ans_mat: Matrix,
+    pub ans_f64: f64,
 }
 
 impl Calculator {
     pub fn new() -> Self {
-        Calculator { memory: HashMap::new() }
+        Calculator { memory: HashMap::new(), ans_mat: Matrix::new(1, 1), ans_f64: f64::NAN }
     }
 
     pub fn interpret(&mut self, parsed_command: ParsedCommand) -> String {
@@ -30,6 +34,12 @@ impl Calculator {
     fn define(&mut self, matrix_name: String, args: String) -> String {
         let pattern_regex = Regex::new(r"(?P<m>\d+)x(?P<n>\d+)").unwrap();
         let name = matrix_name.clone();
+
+        if args.eq_ignore_ascii_case("ans") {
+            let matrix = self.ans_mat.clone();
+            self.memory.insert(matrix_name.to_string(), matrix.clone());
+            return format!("Defined Matrix {} as {}x{} matrix", matrix_name, matrix.rows, matrix.cols);
+        }
     
         let mut m: usize = 0;
         let mut n: usize = 0;
@@ -68,10 +78,11 @@ impl Calculator {
         }
     }
 
-    fn sum(&self, matrix_name: String, args: String) -> String {
+    fn sum(&mut self, matrix_name: String, args: String) -> String {
         let m1 = self.memory.get(&matrix_name).unwrap().clone();
         let m2 = self.memory.get(&args).unwrap().clone();
         let result = sum_matrices(m1, m2);
+        self.ans_mat = result.clone().unwrap();
         result.unwrap().to_string()
     }
 }
