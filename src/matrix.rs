@@ -1,4 +1,6 @@
 use std::fmt::Write;
+use regex::Regex;
+
 
 #[derive(Clone, PartialEq)]
 pub struct Matrix {
@@ -14,19 +16,19 @@ impl Matrix {
     }
 
     pub fn to_string(&self) -> String {
-        let mut result = String::new(); // Create an empty `String` to collect the output
+        let mut result = String::new();
 
         for row in &self.data {
-            write!(result, "|").unwrap(); // Start each row with a `|`
+            write!(result, "|").unwrap();
             
             for elem in row {
-                write!(result, " {:<2}", elem).unwrap(); // Add each element with padding
+                write!(result, " {:<2}", elem).unwrap();
             }
     
-            writeln!(result, "|").unwrap(); // End each row with a `|`
+            writeln!(result, "|").unwrap();
         }
     
-        result // Return the final collected string
+        result
     }
 
     pub fn print(&self) {
@@ -122,4 +124,32 @@ pub fn invert_matrix(m: Matrix) -> Result<Matrix, &'static str> {
 
     let result = Matrix::new(m.rows, m.cols);
     Ok(result)
+}
+
+// Needs to be a string to extract the Regex value 
+pub fn parse_matrix_data(input: &str) -> Result<Vec<Vec<f64>>, String> {
+    let row_pattern = Regex::new(r"\[([^\[\]]*)\]").map_err(|e| e.to_string())?;
+    let number_pattern = Regex::new(r"-?\d+(\.\d+)?").map_err(|e| e.to_string())?;
+
+    let mut matrix_data = Vec::new();
+
+    for row_caps in row_pattern.captures_iter(input) {
+        let row_str = &row_caps[1];
+
+        let mut row_data = Vec::new();
+        for num_caps in number_pattern.captures_iter(row_str) {
+            let num_str = &num_caps[0];
+            let num: f64 = num_str.parse().map_err(|e: std::num::ParseFloatError| e.to_string().to_string())?;
+            row_data.push(num);
+        }
+
+        matrix_data.push(row_data);
+    }
+
+    let row_length = matrix_data.first().map_or(0, |row| row.len());
+    if matrix_data.iter().any(|row| row.len() != row_length) {
+        return Err("Rows have inconsistent lengths.".to_string());
+    }
+
+    Ok(matrix_data)
 }
