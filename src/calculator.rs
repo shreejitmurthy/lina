@@ -18,9 +18,12 @@ impl Calculator {
 
     pub fn interpret(&mut self, parsed_command: ParsedCommand) -> String {
         match parsed_command.command.as_str() {
-            "define" | "def"  => self.define(parsed_command.matrix_name, parsed_command.args),
-            "echo"   | "show" => self.show(parsed_command.matrix_name),
-            _ => todo!()
+            "define"   | "def"  => self.define(parsed_command.matrix_name, parsed_command.args),
+            "echo"     | "show" => self.show(parsed_command.matrix_name),
+            // TODO: These
+            "populate" | "fill" => self.fill(parsed_command.matrix_name, parsed_command.args),
+            "add"      | "sum"  => self.sum(parsed_command.matrix_name, parsed_command.args),
+            _ => "".to_string()
         }
     }
 
@@ -47,7 +50,28 @@ impl Calculator {
         if let Some(matrix) = self.memory.get(&matrix_name) {
             matrix.to_string()
         } else {
-            format!("Matrix '{}' not found.", matrix_name)
+            format!("Matrix '{}' not found in memory.", matrix_name)
         }
+    }
+
+    fn fill(&mut self, matrix_name: String, args: String) -> String {
+        if let Some(matrix) = self.memory.get_mut(&matrix_name) {
+            match parse_matrix_data(args.as_str()) {
+                Ok(parsed_data) => { 
+                    matrix.data = parsed_data; 
+                    format!("Populated Matrix {} with data.", matrix_name)
+                }
+                Err(e) => { format!("Error parsing matrix data: {}", e) }
+            }
+        } else {
+            format!("Matrix '{}' not found in memory.", matrix_name)
+        }
+    }
+
+    fn sum(&self, matrix_name: String, args: String) -> String {
+        let m1 = self.memory.get(&matrix_name).unwrap().clone();
+        let m2 = self.memory.get(&args).unwrap().clone();
+        let result = sum_matrices(m1, m2);
+        result.unwrap().to_string()
     }
 }
